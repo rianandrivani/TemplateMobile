@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#4CAF50</color>
+    <color name="colorDefault">#13b586</color>
+
+    <color name="black">#000000</color>
+    <color name="green">#08ff00</color>
+    <color name="gray">#bfbfbf</color>
+    <color name="white">#FFFFFF</color>
+    <color name="green_old">#035e00</color>
+
+    <color name="title_background">#007F92</color>
+    <color name="title_separator">#40ffffff</color>
+    <color name="title_text">#ffffffff</color>
+
+    <!--<color name="PrimaryColor">#2196F3</color>-->
+    <color name="PrimaryColor">#035e00</color>
+    <color name="primary_color_theme">#4CAF50</color>
+    <color name="table_header_text">#FFFFFF</color>
+    <color name="table_data_row_even">#FFFFFF</color>
+    <color name="table_data_row_odd">#ecf0f1</color>
+</resources>
