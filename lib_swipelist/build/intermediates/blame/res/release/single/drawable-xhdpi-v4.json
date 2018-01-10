@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\ic_launcher.png",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\src\\main\\res\\drawable-xhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\ic_delete.png",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\src\\main\\res\\drawable-xhdpi\\ic_delete.png"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\ic_view.png",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\src\\main\\res\\drawable-xhdpi\\ic_view.png"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\ic_notif.png",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\src\\main\\res\\drawable-xhdpi\\ic_notif.png"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\release\\drawable-xhdpi-v4\\ic_edit.png",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\src\\main\\res\\drawable-xhdpi\\ic_edit.png"
+    }
+]

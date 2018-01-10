@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\item_list_app2.xml",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\bundles\\debug\\res\\layout\\item_list_app2.xml"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\item_list_app.xml",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\bundles\\debug\\res\\layout\\item_list_app.xml"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\xlistview_footer.xml",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\bundles\\debug\\res\\layout\\xlistview_footer.xml"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\item_list_app3.xml",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\bundles\\debug\\res\\layout\\item_list_app3.xml"
+    },
+    {
+        "merged": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\xlistview_header.xml",
+        "source": "C:\\ProjectAndroid\\TemplateMobile\\lib_swipelist\\build\\intermediates\\bundles\\debug\\res\\layout\\xlistview_header.xml"
+    }
+]

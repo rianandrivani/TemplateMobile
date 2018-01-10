@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="C:\ProjectAndroid\TemplateMobile\lib_swipelist\src\main\assets"/><source path="C:\ProjectAndroid\TemplateMobile\lib_swipelist\build\generated\assets\shaders\debug"/></dataSet><dataSet config="debug"><source path="C:\ProjectAndroid\TemplateMobile\lib_swipelist\src\debug\assets"/></dataSet></merger>
