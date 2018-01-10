@@ -290,6 +290,7 @@ public class LoginActivity extends Activity {
         final String username = txtUsername;
         final String password = txtPassword;
         final String clientId = "templateApp";
+        
 
         new VolleyUtils().makeJsonObjectRequestToken(this, strLinkAPI, username, password, clientId, "Request Token, Please Wait", new VolleyResponseListener() {
             @Override
