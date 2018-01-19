@@ -26,10 +26,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.kalbe.project.templatemobile.Common.clsLogin;
 import com.kalbe.project.templatemobile.Common.mProduct;
 import com.kalbe.project.templatemobile.Data.VolleyResponseListener;
 import com.kalbe.project.templatemobile.Data.VolleyUtils;
 import com.kalbe.project.templatemobile.Data.clsHardCode;
+import com.kalbe.project.templatemobile.Repo.clsLoginRepo;
+import com.kalbe.project.templatemobile.Repo.clsPhotoProfilRepo;
 import com.kalbe.project.templatemobile.Repo.mProductRepo;
 
 import org.apache.http.HttpStatus;
@@ -53,6 +56,9 @@ public class FragmentSecondMenu extends Fragment {
     private Button btnDownload;
     public String accessToken;
 
+    clsLoginRepo loginRepo = null;
+    List<clsLogin> dataLogin = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +80,15 @@ public class FragmentSecondMenu extends Fragment {
                 downloadMaster();
             }
         });
+
+        try {
+            loginRepo = new clsLoginRepo(context);
+            dataLogin = (List<clsLogin>) loginRepo.findAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        accessToken = dataLogin.get(0).txtUserToken;
 
         return v;
     }
