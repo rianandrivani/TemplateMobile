@@ -289,8 +289,8 @@ public class LoginActivity extends Activity {
         String strLinkAPI = new clsHardCode().linkToken;
         final String username = txtUsername;
         final String password = txtPassword;
-        final String clientId = "templateApp";
-        
+        final String clientId = "z/iQZAGiEmA+ygHJ+UvmcA3Ij/xrAGQPYzwyp1FI9IE=";
+
 
         new VolleyUtils().makeJsonObjectRequestToken(this, strLinkAPI, username, password, clientId, "Request Token, Please Wait", new VolleyResponseListener() {
             @Override
