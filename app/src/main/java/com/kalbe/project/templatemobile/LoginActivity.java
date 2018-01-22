@@ -28,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.kalbe.project.templatemobile.Common.clsLogin;
 import com.kalbe.project.templatemobile.Common.mMenuData;
 import com.kalbe.project.templatemobile.Data.VolleyResponseListener;
@@ -123,6 +124,7 @@ public class LoginActivity extends Activity {
         btnSubmit = (Button) findViewById(R.id.buttonLogin);
         btnExit = (Button) findViewById(R.id.buttonExit);
         spnRole = (Spinner) findViewById(R.id.spnRole);
+        final CircularProgressView progressView = (CircularProgressView) findViewById(R.id.progress_view);
 
         // Spinner Drop down elements
         final List<String> roleName = new ArrayList<String>();
@@ -213,6 +215,9 @@ public class LoginActivity extends Activity {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+//                progressView.setVisibility(View.VISIBLE);
+//                progressView.startAnimation();
+
                 if (etUsername.getText().toString().equals("")){
                     Toast.makeText(getApplicationContext(), "Username tidak boleh kosong", Toast.LENGTH_SHORT).show();
                 }else if (etPassword.getText().toString().equals("")){
