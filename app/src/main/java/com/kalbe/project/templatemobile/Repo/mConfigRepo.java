@@ -15,9 +15,9 @@ import java.util.List;
 
 public class mConfigRepo {
     DatabaseHelper helper;
-    public String API_menu = "http://wms.kalbe.com/abc";
-    public String API = "http://10.171.11.114/WebAPITemplate/API/";
-    public String APIToken = "http://10.171.11.114/WebAPITemplate/";
+    public String API_menu = "http://template.kalbe.com/abc";
+    public String API = "http://10.171.11.101/WebAPITemplate/API/";
+    public String APIToken = "http://10.171.11.101/WebAPITemplate/";
 
     public mConfigRepo(Context context) {
         DatabaseManager.init(context);
@@ -57,14 +57,14 @@ public class mConfigRepo {
         data4.setIntId(4);
         data4.setTxtName("Application Name");
         data4.setTxtValue("Kalbe Template");
-        data4.setTxtDefaultValue("templateApp");
+        data4.setTxtDefaultValue("z/iQZAGiEmA+ygHJ+UvmcA3Ij/xrAGQPYzwyp1FI9IE=");
         data4.setIntEditAdmin("1");
         helper.getmConfigDao().createOrUpdate(data4);
         mConfigData data5= new mConfigData();
         data5.setIntId(5);
         data5.setTxtName("Text Footer");
-        data5.setTxtValue("Copyright &copy; KN IT 2017");
-        data5.setTxtDefaultValue("Copyright &copy; KN IT 2017");
+        data5.setTxtValue("Copyright &copy; KN IT 2018");
+        data5.setTxtDefaultValue("Copyright &copy; KN IT 2018");
         data5.setIntEditAdmin("1");
         helper.getmConfigDao().createOrUpdate(data5);
     }

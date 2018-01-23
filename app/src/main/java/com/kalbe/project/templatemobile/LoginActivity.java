@@ -40,6 +40,7 @@ import com.kalbe.project.templatemobile.Repo.mMenuRepo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -54,7 +55,7 @@ import java.util.List;
 public class LoginActivity extends Activity {
     private static final int REQUEST_READ_PHONE_STATE = 0;
     EditText etUsername, etPassword;
-    String txtUsername, txtPassword, imeiNumber, deviceName, accessToken;;
+    String txtUsername, txtPassword, imeiNumber, deviceName, accessToken, refreshToken;
     Button btnSubmit, btnExit;
     Spinner spnRole;
 
@@ -309,6 +310,7 @@ public class LoginActivity extends Activity {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         accessToken = jsonObject.getString("access_token");
+                        refreshToken = jsonObject.getString("refresh_token");
 
                         try {
                             loginRepo = new clsLoginRepo(getApplicationContext());
@@ -325,6 +327,7 @@ public class LoginActivity extends Activity {
                         data.setTxtImei(imeiNumber);
                         data.setTxtDeviceName(deviceName);
                         data.setTxtUserToken(accessToken);
+                        data.setTxtRefreshToken(refreshToken);
 
                         loginRepo.createOrUpdate(data);
                         Log.d("Data info", "Login Success");

@@ -66,6 +66,14 @@ public class clsLogin implements Serializable {
         this.txtUserToken = txtUserToken;
     }
 
+    public String getTxtRefreshToken() {
+        return txtRefreshToken;
+    }
+
+    public void setTxtRefreshToken(String txtRefreshToken) {
+        this.txtRefreshToken = txtRefreshToken;
+    }
+
     @DatabaseField(id = true,columnName = "txtGuiID")
     public String txtGuiId;
     @DatabaseField(columnName = "txtUsername")
@@ -80,4 +88,6 @@ public class clsLogin implements Serializable {
     public String txtDeviceName;
     @DatabaseField(columnName = "txtUserToken")
     public String txtUserToken;
+    @DatabaseField(columnName = "txtRefreshToken")
+    public String txtRefreshToken;
 }
