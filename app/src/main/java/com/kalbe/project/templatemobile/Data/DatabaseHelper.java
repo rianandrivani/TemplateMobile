@@ -28,7 +28,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     // name of the database file for your application -- change to something appropriate for your app
     private static final String DATABASE_NAME = _path.dbName;
     // any time you make changes to your database objects, you may have to increase the database version
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
 
     // the DAO object we use to access the SimpleData table
     protected Dao<mConfigData, Integer> mConfigDao;
@@ -76,9 +76,9 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         try {
             dao = getLoginDao();
 
-            if (oldVersion < 2) {
-                dao.executeRaw("ALTER TABLE `clsLogin` ADD COLUMN txtRefreshToken TEXT;");
-            }
+//            if (oldVersion < 2) {
+//                dao.executeRaw("ALTER TABLE `clsLogin` ADD COLUMN txtRefreshToken TEXT;");
+//            }
             Log.i(DatabaseHelper.class.getName(), "onUpgrade");
 //            TableUtils.dropTable(connectionSource, mConfigData.class, true);
 //            TableUtils.dropTable(connectionSource, clsLogin.class, true);

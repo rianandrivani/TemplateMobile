@@ -46,6 +46,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -291,6 +292,7 @@ public class LoginActivity extends Activity {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         final String now = dateFormat.format(cal.getTime()).toString();
+        final String currentDateTime = DateFormat.getDateTimeInstance().format(new Date());
 
         String strLinkAPI = new clsHardCode().linkToken;
         final String username = txtUsername;
@@ -328,6 +330,7 @@ public class LoginActivity extends Activity {
                         data.setTxtDeviceName(deviceName);
                         data.setTxtUserToken(accessToken);
                         data.setTxtRefreshToken(refreshToken);
+                        data.setDtIssuedToken(currentDateTime);
 
                         loginRepo.createOrUpdate(data);
                         Log.d("Data info", "Login Success");
