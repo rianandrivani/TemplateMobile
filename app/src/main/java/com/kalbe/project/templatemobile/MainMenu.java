@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -18,8 +19,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -39,6 +42,19 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.kalbe.project.templatemobile.BL.clsActivity;
 import com.kalbe.project.templatemobile.Common.clsLogin;
 import com.kalbe.project.templatemobile.Common.clsPhotoProfile;
@@ -75,7 +91,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by Rian Andrivani on 11/22/2017.
  */
 
-public class MainMenu extends AppCompatActivity {
+public class MainMenu extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult> {
     private Toolbar toolbar;
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
@@ -103,6 +119,10 @@ public class MainMenu extends AppCompatActivity {
     private TextView tvUsername, tvEmail;
     CircleImageView ivProfile;
     private Uri uriImage, selectedImage;
+
+    protected GoogleApiClient mGoogleApiClient;
+    protected LocationRequest locationRequest;
+    int REQUEST_CHECK_SETTINGS = 100;
 
     @Override
     public void onBackPressed() {
@@ -157,6 +177,19 @@ public class MainMenu extends AppCompatActivity {
         ivProfile = (CircleImageView) vwHeader.findViewById(R.id.profile_image);
         tvUsername = (TextView) vwHeader.findViewById(R.id.username);
         tvEmail = (TextView) vwHeader.findViewById(R.id.email);
+
+        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this).addApi(AppIndex.API).build();
+        mGoogleApiClient.connect();
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(30 * 1000);
+        locationRequest.setFastestInterval(5 * 1000);
 
         phtProfile = null;
 
@@ -257,7 +290,7 @@ public class MainMenu extends AppCompatActivity {
                                 dialog2.setCancelable(false);
                                 dialog2.show();
 
-                                new android.os.Handler().postDelayed(
+                                new Handler().postDelayed(
                                         new Runnable() {
                                             public void run() {
                                                 // On complete call either onLoginSuccess or onLoginFailed
@@ -587,6 +620,61 @@ public class MainMenu extends AppCompatActivity {
         File mediaFile;
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + "tmp_act"  + ".png");
         return mediaFile;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(
+                        mGoogleApiClient,
+                        builder.build()
+                );
+
+        result.setResultCallback(this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
+        final Status status = locationSettingsResult.getStatus();
+        switch (status.getStatusCode()) {
+            case LocationSettingsStatusCodes.SUCCESS:
+
+                // NO need to show the dialog;
+
+                break;
+
+            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                //  Location settings are not satisfied. Show the user a dialog
+
+                try {
+                    // Show the dialog by calling startResolutionForResult(), and check the result
+                    // in onActivityResult().
+
+                    status.startResolutionForResult(MainMenu.this, REQUEST_CHECK_SETTINGS);
+
+                } catch (IntentSender.SendIntentException e) {
+
+                    //failed to show
+                }
+                break;
+
+            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                // Location settings are unavailable so not possible to show any dialog now
+                break;
+        }
     }
 
     public static class Utility {

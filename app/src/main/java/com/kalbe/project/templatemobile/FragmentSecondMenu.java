@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.kalbe.project.templatemobile.Common.clsLogin;
@@ -40,9 +42,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +59,12 @@ public class FragmentSecondMenu extends Fragment {
 
     private Spinner spnMasterProduct;
     private Button btnDownload;
-    public String accessToken;
+    public String accessToken, refreshToken;
 
     clsLoginRepo loginRepo = null;
+    mProductRepo productRepo = null;
     List<clsLogin> dataLogin = null;
+    List<mProduct> dtProduct = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,21 +81,30 @@ public class FragmentSecondMenu extends Fragment {
         spnMasterProduct = (Spinner) v.findViewById(R.id.spnMasterProduct);
         btnDownload = (Button) v.findViewById(R.id.btnDownload);
 
-        btnDownload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                downloadMaster();
-            }
-        });
-
         try {
             loginRepo = new clsLoginRepo(context);
+            productRepo = new mProductRepo(context);
+            dtProduct = (List<mProduct>) productRepo.findAll();
             dataLogin = (List<clsLogin>) loginRepo.findAll();
+
+            if (dtProduct.size() > 0) {
+                showProduct();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         accessToken = dataLogin.get(0).txtUserToken;
+
+        btnDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (dtProduct.size() > 0)
+                    Toast.makeText(context, "Product Available", Toast.LENGTH_SHORT).show();
+                else
+                    downloadMaster();
+            }
+        });
 
         return v;
     }
@@ -130,7 +146,7 @@ public class FragmentSecondMenu extends Fragment {
                                 mProductRepo repo = new mProductRepo(context);
                                 repo.createOrUpdate(data);
 
-                                showProduct();
+                                insertProduct();
                             }
                         } else {
                             Toast.makeText(context, "Something Failed...", Toast.LENGTH_SHORT).show();
@@ -146,6 +162,8 @@ public class FragmentSecondMenu extends Fragment {
     }
 
     private void volleyDownloadMaster(String strLinkAPI, final String mRequestBody, String progressBarType, final VolleyResponseListener listener) {
+        final String[] body = new String[1];
+        final String[] message = new String[1];
         RequestQueue queue = Volley.newRequestQueue(context);
         final ProgressDialog Dialog = new ProgressDialog(getActivity());
         Dialog.setMessage(progressBarType);
@@ -166,43 +184,72 @@ public class FragmentSecondMenu extends Fragment {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                String strLinkAPI = new clsHardCode().linkToken;
+                String refresh_token = dataLogin.get(0).txtRefreshToken;
                 NetworkResponse networkResponse = error.networkResponse;
                 if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
                     // HTTP Status Code: 401 Unauthorized
-                    Toast.makeText(context, "Error 401", Toast.LENGTH_SHORT).show();
-                    finalDialog1.dismiss();
-                    if (error.getMessage() != null) {
-                        listener.onError(error.getMessage());
+                    try {
+                        // body for value error response
+                        body[0] = new String(error.networkResponse.data,"UTF-8");
+                        JSONObject jsonObject = new JSONObject(body[0]);
+                        message[0] = jsonObject.getString("Message");
+                        //Toast.makeText(context, "Error 401, " + message[0], Toast.LENGTH_SHORT).show();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+
+                    new VolleyUtils().requestTokenWithRefresh(getActivity(), strLinkAPI, refresh_token, "z/iQZAGiEmA+ygHJ+UvmcA3Ij/xrAGQPYzwyp1FI9IE=", new VolleyResponseListener() {
+                        @Override
+                        public void onError(String message) {
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onResponse(String response, Boolean status, String strErrorMsg) {
+                            if (response != null) {
+                                try {
+                                    String currentDateTime = DateFormat.getDateTimeInstance().format(new Date());
+                                    JSONObject jsonObject = new JSONObject(response);
+                                    accessToken = jsonObject.getString("access_token");
+                                    refreshToken = jsonObject.getString("refresh_token");
+
+                                    clsLogin data = new clsLogin();
+                                    data.setTxtGuiId(dataLogin.get(0).txtGuiId);
+                                    data.setTxtUsername(dataLogin.get(0).txtUsername);
+                                    data.setTxtPassword(dataLogin.get(0).txtPassword);
+                                    data.setDtLogin(dataLogin.get(0).dtLogin);
+                                    data.setTxtImei(dataLogin.get(0).txtImei);
+                                    data.setTxtDeviceName(dataLogin.get(0).txtDeviceName);
+                                    data.setTxtUserToken(accessToken);
+                                    data.setTxtRefreshToken(refreshToken);
+                                    data.setDtIssuedToken(currentDateTime);
+
+                                    loginRepo.createOrUpdate(data);
+                                    Toast.makeText(context, "Success get new Access Token", Toast.LENGTH_SHORT).show();
+
+                                    new clsHardCode().copydb(context);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+
+                    if (refreshToken != null) {
+                        downloadMaster();
+                        finalDialog1.dismiss();
+                    }
+                    finalDialog1.dismiss();
+
                 } else {
-                    popup();
+                    Toast.makeText(context, "Error 500, Server Error", Toast.LENGTH_SHORT).show();
                     finalDialog1.dismiss();
                 }
-            }
-            public void popup() {
-                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
-
-                builder.setTitle("Request Time Out");
-                builder.setMessage("You Have to request again");
-
-                builder.setPositiveButton("REFRESH", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        downloadMaster();
-                        dialog.dismiss();
-                    }
-                });
-
-                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-
-                android.app.AlertDialog alert = builder.create();
-                alert.show();
             }
         }) {
             @Override
@@ -235,7 +282,7 @@ public class FragmentSecondMenu extends Fragment {
 
     }
 
-    private void showProduct() {
+    private void insertProduct() {
         mProduct data = new mProduct();
         data.setTxtGuiId("1");
         data.setTxtProductCode("ENT");
@@ -294,7 +341,10 @@ public class FragmentSecondMenu extends Fragment {
         productRepo.createOrUpdate(data7);
         productRepo.createOrUpdate(data8);
 
-        List<mProduct> dtProduct = null;
+        showProduct();
+    }
+
+    private void showProduct() {
         try {
             productRepo = new mProductRepo(context);
             dtProduct = (List<mProduct>) productRepo.findAll();
