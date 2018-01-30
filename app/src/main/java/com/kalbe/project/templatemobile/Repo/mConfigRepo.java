@@ -24,6 +24,26 @@ public class mConfigRepo {
         helper = DatabaseManager.getInstance().getHelper();
     }
 
+    public Object findById(int value) throws SQLException {
+        mConfigData item = null;
+        try{
+            item = helper.getmConfigDao().queryForId(value);
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return item;
+    }
+
+    public List<?> findAll() throws SQLException {
+        List<mConfigData> items = null;
+        try{
+            items = helper.getmConfigDao().queryForAll();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return items;
+    }
+
     public void InsertDefaultmConfig() throws SQLException {
         mConfigData data1 = new mConfigData();
         data1.setIntId(1);
@@ -32,6 +52,7 @@ public class mConfigRepo {
         data1.setTxtDefaultValue("5");
         data1.setIntEditAdmin("1");
         helper.getmConfigDao().createOrUpdate(data1);
+
         mConfigData data2 = new mConfigData();
         data2.setIntId(2);
         data2.setTxtName("API_menu");
@@ -39,13 +60,7 @@ public class mConfigRepo {
         data2.setTxtDefaultValue(API_menu);
         data2.setIntEditAdmin("1");
         helper.getmConfigDao().createOrUpdate(data2);
-//        mConfigData data3 = new mConfigData();
-//        data3.setIntId(3);
-//        data3.setTxtName("API_VERSION");
-//        data3.setTxtValue("http://http://10.171.11.70/WebApi2/KF/CheckVersionApp");
-//        data3.setTxtDefaultValue("http://10.171.11.70/WebApi2/KF/CheckVersionApp");
-//        data3.setIntEditAdmin("1");
-//        helper.getmConfigDao().createOrUpdate(data3);
+
         mConfigData data3 = new mConfigData();
         data3.setIntId(3);
         data3.setTxtName("Domain Kalbe");
@@ -53,19 +68,29 @@ public class mConfigRepo {
         data3.setTxtDefaultValue("ONEKALBE.LOCAL");
         data3.setIntEditAdmin("1");
         helper.getmConfigDao().createOrUpdate(data3);
+
         mConfigData data4 = new mConfigData();
         data4.setIntId(4);
         data4.setTxtName("Application Name");
         data4.setTxtValue("Kalbe Template");
-        data4.setTxtDefaultValue("z/iQZAGiEmA+ygHJ+UvmcA3Ij/xrAGQPYzwyp1FI9IE=");
+        data4.setTxtDefaultValue("3VyizZ7haX2KCvR0wl64YwulEteHqsq5FLncJSL+pBM=");
         data4.setIntEditAdmin("1");
         helper.getmConfigDao().createOrUpdate(data4);
-        mConfigData data5= new mConfigData();
+
+        mConfigData data5 = new mConfigData();
         data5.setIntId(5);
-        data5.setTxtName("Text Footer");
-        data5.setTxtValue("Copyright &copy; KN IT 2018");
-        data5.setTxtDefaultValue("Copyright &copy; KN IT 2018");
+        data5.setTxtName("UserId");
+        data5.setTxtValue("rian.andrivani");
+        data5.setTxtDefaultValue("rian.andrivani");
         data5.setIntEditAdmin("1");
         helper.getmConfigDao().createOrUpdate(data5);
+
+        mConfigData data6 = new mConfigData();
+        data6.setIntId(6);
+        data6.setTxtName("Text Footer");
+        data6.setTxtValue("Copyright &copy; KN IT 2018");
+        data6.setTxtDefaultValue("Copyright &copy; KN IT 2018");
+        data6.setIntEditAdmin("1");
+        helper.getmConfigDao().createOrUpdate(data6);
     }
 }

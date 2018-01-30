@@ -21,11 +21,13 @@ import android.widget.TextView;
 
 import com.kalbe.project.templatemobile.BL.clsMainBL;
 import com.kalbe.project.templatemobile.Common.clsStatusMenuStart;
+import com.kalbe.project.templatemobile.Common.mConfigData;
 import com.kalbe.project.templatemobile.Repo.enumStatusMenuStart;
 import com.kalbe.project.templatemobile.Repo.mConfigRepo;
 
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -182,7 +184,11 @@ public class SplashActivity extends AppCompatActivity {
                 }
 
                 try {
-                    new mConfigRepo(getApplicationContext()).InsertDefaultmConfig();
+                    mConfigRepo configRepo = new mConfigRepo(getApplicationContext());
+                    List<mConfigData> listConfigData = (List<mConfigData>) configRepo.findAll();
+                    if (listConfigData.size() == 0){
+                        new mConfigRepo(getApplicationContext()).InsertDefaultmConfig();
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

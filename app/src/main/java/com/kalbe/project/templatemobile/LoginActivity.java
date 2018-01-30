@@ -2,6 +2,7 @@ package com.kalbe.project.templatemobile;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,26 +29,43 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.kalbe.project.templatemobile.Common.clsLogin;
+import com.kalbe.project.templatemobile.Common.clsToken;
+import com.kalbe.project.templatemobile.Common.mConfigData;
 import com.kalbe.project.templatemobile.Common.mMenuData;
 import com.kalbe.project.templatemobile.Data.VolleyResponseListener;
 import com.kalbe.project.templatemobile.Data.VolleyUtils;
 import com.kalbe.project.templatemobile.Data.clsHardCode;
 import com.kalbe.project.templatemobile.Repo.clsLoginRepo;
+import com.kalbe.project.templatemobile.Repo.clsTokenRepo;
+import com.kalbe.project.templatemobile.Repo.mConfigRepo;
 import com.kalbe.project.templatemobile.Repo.mMenuRepo;
 
+import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Rian Andrivani on 11/22/2017.
@@ -56,15 +74,17 @@ import java.util.List;
 public class LoginActivity extends Activity {
     private static final int REQUEST_READ_PHONE_STATE = 0;
     EditText etUsername, etPassword;
-    String txtUsername, txtPassword, imeiNumber, deviceName, accessToken, refreshToken;
+    String txtUsername, txtPassword, imeiNumber, deviceName, accessToken, refreshToken, access_token;
+    String clientId = "";
     Button btnSubmit, btnExit;
     Spinner spnRole;
 
     private int intSet = 1;
     int intProcesscancel = 0;
 
-    List<clsLogin> dataLogin;
+    List<clsToken> dataToken;
     clsLoginRepo loginRepo;
+    clsTokenRepo tokenRepo;
     mMenuRepo menuRepo;
 
     @Override
@@ -128,10 +148,22 @@ public class LoginActivity extends Activity {
         spnRole = (Spinner) findViewById(R.id.spnRole);
         final CircularProgressView progressView = (CircularProgressView) findViewById(R.id.progress_view);
 
+        try {
+            loginRepo = new clsLoginRepo(getApplicationContext());
+            tokenRepo = new clsTokenRepo(getApplicationContext());
+            dataToken = (List<clsToken>) tokenRepo.findAll();
+            if (dataToken.size() == 0) {
+                requestToken();
+            } else {
+                access_token = dataToken.get(0).getTxtUserToken();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         // Spinner Drop down elements
         final List<String> roleName = new ArrayList<String>();
         roleName.add("Select One");
-
 
         etUsername.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -268,7 +300,7 @@ public class LoginActivity extends Activity {
         builder.setPositiveButton("LOGIN", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
-                requestTokenAndLogin();
+                login();
                 dialog.dismiss();
             }
         });
@@ -286,21 +318,81 @@ public class LoginActivity extends Activity {
     }
 
     // sesuaikan username dan password dengan data di server
-    private void requestTokenAndLogin() {
+    private void login() {
         txtUsername = etUsername.getText().toString();
         txtPassword = etPassword.getText().toString();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         final String now = dateFormat.format(cal.getTime()).toString();
         final String currentDateTime = DateFormat.getDateTimeInstance().format(new Date());
+        String strLinkAPI = new clsHardCode().linkLogin;
+        JSONObject resJson = new JSONObject();
+        try {
+            resJson.put("txtUsername", txtUsername);
+            resJson.put("txtPassword", txtPassword);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        final String mRequestBody = resJson.toString();
 
+        volleyLogin(strLinkAPI, mRequestBody, "Please Wait....", new VolleyResponseListener() {
+            @Override
+            public void onError(String message) {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResponse(String response, Boolean status, String strErrorMsg) {
+                if (response != null) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        JSONObject jsn = jsonObject.getJSONObject("result");
+                        String warn = jsn.getString("txtMessage");
+                        String result = jsn.getString("intResult");
+
+                        if (result.equals("1")){
+                            clsLogin data = new clsLogin();
+                            data.setTxtGuiId("1");
+                            data.setTxtUsername(txtUsername);
+                            data.setTxtPassword(txtPassword);
+                            data.setDtLogin(now);
+                            data.setTxtImei(imeiNumber);
+                            data.setTxtDeviceName(deviceName);
+
+                            loginRepo.createOrUpdate(data);
+                            Log.d("Data info", "Login Success");
+                            listMenu();
+
+                            Intent intent = new Intent(LoginActivity.this, MainMenu.class);
+                            finish();
+                            startActivity(intent);
+
+                        } else {
+                            Toast.makeText(getApplicationContext(), warn, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    private void requestToken(){
+        String username = "";
         String strLinkAPI = new clsHardCode().linkToken;
-        final String username = txtUsername;
-        final String password = txtPassword;
-        final String clientId = "z/iQZAGiEmA+ygHJ+UvmcA3Ij/xrAGQPYzwyp1FI9IE=";
 
+        mConfigRepo configRepo = new mConfigRepo(getApplicationContext());
+        try {
+            mConfigData configDataClient = (mConfigData) configRepo.findById(4);
+            mConfigData configDataUser = (mConfigData) configRepo.findById(5);
+            username = configDataUser.getTxtDefaultValue().toString();
+            clientId = configDataClient.getTxtDefaultValue().toString();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        new VolleyUtils().makeJsonObjectRequestToken(this, strLinkAPI, username, password, clientId, "Request Token, Please Wait", new VolleyResponseListener() {
+        new VolleyUtils().makeJsonObjectRequestToken(this, strLinkAPI, username, "", clientId, "Request Token, Please Wait", new VolleyResponseListener() {
             @Override
             public void onError(String message) {
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
@@ -313,39 +405,146 @@ public class LoginActivity extends Activity {
                         JSONObject jsonObject = new JSONObject(response);
                         accessToken = jsonObject.getString("access_token");
                         refreshToken = jsonObject.getString("refresh_token");
+                        String dtIssued = jsonObject.getString(".issued");
 
-                        try {
-                            loginRepo = new clsLoginRepo(getApplicationContext());
-                            dataLogin = (List<clsLogin>) loginRepo.findAll();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-
-                        clsLogin data = new clsLogin();
-                        data.setTxtGuiId(String.valueOf(dataLogin.size() + 1));
-                        data.setTxtUsername(txtUsername);
-                        data.setTxtPassword(txtPassword);
-                        data.setDtLogin(now);
-                        data.setTxtImei(imeiNumber);
-                        data.setTxtDeviceName(deviceName);
+                        clsToken data = new clsToken();
+                        data.setIntId("1");
+                        data.setDtIssuedToken(dtIssued);
                         data.setTxtUserToken(accessToken);
                         data.setTxtRefreshToken(refreshToken);
-                        data.setDtIssuedToken(currentDateTime);
 
-                        loginRepo.createOrUpdate(data);
-                        Log.d("Data info", "Login Success");
-                        listMenu();
+                        tokenRepo.createOrUpdate(data);
+                        Log.d("Data info", "get access_token & refresh_token, Success");
 
-                        Intent intent = new Intent(LoginActivity.this, MainMenu.class);
-                        finish();
-                        startActivity(intent);
-
+                        Toast.makeText(getApplicationContext(), "Ready For Login", Toast.LENGTH_SHORT).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
             }
         });
+    }
+
+    private void volleyLogin(String strLinkAPI, final String mRequestBody, String progressBarType, final VolleyResponseListener listener) {
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        final String[] body = new String[1];
+        final String[] message = new String[1];
+        final ProgressDialog Dialog = new ProgressDialog(LoginActivity.this);
+        Dialog.setMessage(progressBarType);
+        Dialog.setCancelable(false);
+        Dialog.show();
+
+        final ProgressDialog finalDialog = Dialog;
+        final ProgressDialog finalDialog1 = Dialog;
+
+        mConfigRepo configRepo = new mConfigRepo(getApplicationContext());
+        try {
+            mConfigData configDataClient = (mConfigData) configRepo.findById(4);
+            clientId = configDataClient.getTxtDefaultValue().toString();
+            dataToken = (List<clsToken>) tokenRepo.findAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        StringRequest request = new StringRequest(Request.Method.POST, strLinkAPI, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Boolean status = false;
+                String errorMessage = null;
+                listener.onResponse(response, status, errorMessage);
+                finalDialog.dismiss();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                String strLinkAPI = new clsHardCode().linkToken;
+                String refresh_token = dataToken.get(0).txtRefreshToken;
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                    // HTTP Status Code: 401 Unauthorized
+                    try {
+                        // body for value error response
+                        body[0] = new String(error.networkResponse.data,"UTF-8");
+                        JSONObject jsonObject = new JSONObject(body[0]);
+                        message[0] = jsonObject.getString("Message");
+                        //Toast.makeText(context, "Error 401, " + message[0], Toast.LENGTH_SHORT).show();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    new VolleyUtils().requestTokenWithRefresh(LoginActivity.this, strLinkAPI, refresh_token, clientId, new VolleyResponseListener() {
+                        @Override
+                        public void onError(String message) {
+                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onResponse(String response, Boolean status, String strErrorMsg) {
+                            if (response != null) {
+                                try {
+                                    JSONObject jsonObject = new JSONObject(response);
+                                    accessToken = jsonObject.getString("access_token");
+                                    refreshToken = jsonObject.getString("refresh_token");
+                                    String dtIssued = jsonObject.getString(".issued");
+
+                                    clsToken data = new clsToken();
+                                    data.setIntId("1");
+                                    data.setDtIssuedToken(dtIssued);
+                                    data.setTxtUserToken(accessToken);
+                                    data.setTxtRefreshToken(refreshToken);
+
+                                    tokenRepo.createOrUpdate(data);
+                                    Toast.makeText(getApplicationContext(), "Success get new Access Token", Toast.LENGTH_SHORT).show();
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+
+                    if (refreshToken != null) {
+                        login();
+                        finalDialog1.dismiss();
+                    }
+                    finalDialog1.dismiss();
+
+                } else {
+                    Toast.makeText(getApplicationContext(), "Error 500, Server Error", Toast.LENGTH_SHORT).show();
+                    finalDialog1.dismiss();
+                }
+            }
+        }) {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    return mRequestBody == null ? null : mRequestBody.getBytes("utf-8");
+                } catch (UnsupportedEncodingException uee) {
+                    return null;
+                }
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + access_token);
+
+                return headers;
+            }
+        };
+        request.setRetryPolicy(new
+                DefaultRetryPolicy(60000,
+                0,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        queue.add(request);
     }
 
     private void listMenu() {

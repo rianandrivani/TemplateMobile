@@ -11,6 +11,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import com.kalbe.project.templatemobile.Common.clsLogin;
 import com.kalbe.project.templatemobile.Common.clsPhotoProfile;
+import com.kalbe.project.templatemobile.Common.clsToken;
 import com.kalbe.project.templatemobile.Common.mConfigData;
 import com.kalbe.project.templatemobile.Common.mMenuData;
 import com.kalbe.project.templatemobile.Common.mProduct;
@@ -51,6 +52,9 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     protected Dao<tOrderDetail, Integer> orderDetailDao;
     protected RuntimeExceptionDao<tOrderDetail, Integer> orderDetailRuntimeDao;
 
+    protected Dao<clsToken, Integer> tokenDao;
+    protected RuntimeExceptionDao<clsToken, Integer> tokenRuntimeDao;
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -60,6 +64,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         try {
             TableUtils.createTableIfNotExists(connectionSource, mConfigData.class);
             TableUtils.createTableIfNotExists(connectionSource, clsLogin.class);
+            TableUtils.createTableIfNotExists(connectionSource, clsToken.class);
             TableUtils.createTableIfNotExists(connectionSource, mMenuData.class);
             TableUtils.createTableIfNotExists(connectionSource, clsPhotoProfile.class);
             TableUtils.createTableIfNotExists(connectionSource, mProduct.class);
@@ -117,6 +122,13 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return mConfigDao;
     }
 
+    public Dao<clsToken, Integer> getTokenDao() throws SQLException {
+        if (tokenDao == null) {
+            tokenDao = getDao(clsToken.class);
+        }
+        return tokenDao;
+    }
+
     public Dao<clsLogin, Integer> getLoginDao() throws SQLException {
         if (loginDao == null) {
             loginDao = getDao(clsLogin.class);
@@ -163,6 +175,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     public void close() {
         mConfigDao = null;
         loginDao = null;
+        tokenDao = null;
         menuDao = null;
         profileDao = null;
         productDao = null;

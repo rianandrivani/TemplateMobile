@@ -22,6 +22,7 @@ public class clsHardCode {
     public String txtFolderData = Environment.getExternalStorageDirectory()+ File.separator+"Android"+File.separator+"data"+File.separator+"KalbeFamily"+File.separator+"image_Person"+File.separator;
 
     public String linkMaster = new mConfigRepo(context).API + "mProduct";
+    public String linkLogin = new mConfigRepo(context).API + "Login";
     public String linkToken = new mConfigRepo(context).APIToken + "token";
 
     public String copydb(Context context) throws IOException {

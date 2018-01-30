@@ -58,30 +58,6 @@ public class clsLogin implements Serializable {
         this.txtDeviceName = txtDeviceName;
     }
 
-    public String getTxtUserToken() {
-        return txtUserToken;
-    }
-
-    public void setTxtUserToken(String txtUserToken) {
-        this.txtUserToken = txtUserToken;
-    }
-
-    public String getTxtRefreshToken() {
-        return txtRefreshToken;
-    }
-
-    public void setTxtRefreshToken(String txtRefreshToken) {
-        this.txtRefreshToken = txtRefreshToken;
-    }
-
-    public String getDtIssuedToken() {
-        return dtIssuedToken;
-    }
-
-    public void setDtIssuedToken(String dtIssuedToken) {
-        this.dtIssuedToken = dtIssuedToken;
-    }
-
     @DatabaseField(id = true,columnName = "txtGuiID")
     public String txtGuiId;
     @DatabaseField(columnName = "txtUsername")
@@ -90,14 +66,8 @@ public class clsLogin implements Serializable {
     public String txtPassword;
     @DatabaseField(columnName = "dtLogin")
     public String dtLogin;
-    @DatabaseField(columnName = "dtIssuedToken")
-    public String dtIssuedToken;
     @DatabaseField(columnName = "txtImei")
     public String txtImei;
     @DatabaseField(columnName = "txtDeviceName")
     public String txtDeviceName;
-    @DatabaseField(columnName = "txtUserToken")
-    public String txtUserToken;
-    @DatabaseField(columnName = "txtRefreshToken")
-    public String txtRefreshToken;
 }

@@ -66,7 +66,7 @@ public class VolleyUtils {
                     if (error.getMessage() != null) {
                         listener.onError(error.getMessage());
                     }
-                } else if (networkResponse.statusCode == HttpStatus.SC_BAD_REQUEST) {
+                } else if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_BAD_REQUEST) {
                     try {
                         body = new String(error.networkResponse.data,"UTF-8");
                         JSONObject jsonObject = new JSONObject(body);
@@ -78,7 +78,7 @@ public class VolleyUtils {
                         e.printStackTrace();
                     }
                     finalDialog1.dismiss();
-                } else if (networkResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR ){
+                } else if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR ){
                     Toast.makeText(activity.getApplicationContext(), "Error 500, Server Error", Toast.LENGTH_SHORT).show();
                     finalDialog1.dismiss();
                 } else {
@@ -163,19 +163,12 @@ public class VolleyUtils {
                     if (error.getMessage() != null) {
                         listener.onError(error.getMessage());
                     }
-                } else if (networkResponse.statusCode == HttpStatus.SC_BAD_REQUEST) {
-                    try {
-                        body = new String(error.networkResponse.data,"UTF-8");
-                        JSONObject jsonObject = new JSONObject(body);
-                        message = jsonObject.getString("error_description");
-                        Toast.makeText(activity.getApplicationContext(), "Error 400, " + message, Toast.LENGTH_SHORT).show();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else if (networkResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR ){
+                } else if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_BAD_REQUEST) {
+                    Toast.makeText(activity.getApplicationContext(), "session has expired, please login again", Toast.LENGTH_SHORT).show();
+                } else if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR ){
                     Toast.makeText(activity.getApplicationContext(), "Error 500, Server Error", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(activity.getApplicationContext(), "Something Error, please request again", Toast.LENGTH_SHORT).show();
                 }
             }
         }) {

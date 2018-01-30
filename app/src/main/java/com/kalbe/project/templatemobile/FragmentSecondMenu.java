@@ -29,12 +29,14 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.kalbe.project.templatemobile.Common.clsLogin;
+import com.kalbe.project.templatemobile.Common.clsToken;
 import com.kalbe.project.templatemobile.Common.mProduct;
 import com.kalbe.project.templatemobile.Data.VolleyResponseListener;
 import com.kalbe.project.templatemobile.Data.VolleyUtils;
 import com.kalbe.project.templatemobile.Data.clsHardCode;
 import com.kalbe.project.templatemobile.Repo.clsLoginRepo;
 import com.kalbe.project.templatemobile.Repo.clsPhotoProfilRepo;
+import com.kalbe.project.templatemobile.Repo.clsTokenRepo;
 import com.kalbe.project.templatemobile.Repo.mProductRepo;
 
 import org.apache.http.HttpStatus;
@@ -62,8 +64,10 @@ public class FragmentSecondMenu extends Fragment {
     public String accessToken, refreshToken;
 
     clsLoginRepo loginRepo = null;
+    clsTokenRepo tokenRepo = null;
     mProductRepo productRepo = null;
     List<clsLogin> dataLogin = null;
+    List<clsToken> dataToken = null;
     List<mProduct> dtProduct = null;
 
     @Override
@@ -83,9 +87,11 @@ public class FragmentSecondMenu extends Fragment {
 
         try {
             loginRepo = new clsLoginRepo(context);
+            tokenRepo = new clsTokenRepo(context);
             productRepo = new mProductRepo(context);
             dtProduct = (List<mProduct>) productRepo.findAll();
             dataLogin = (List<clsLogin>) loginRepo.findAll();
+            dataToken = (List<clsToken>) tokenRepo.findAll();
 
             if (dtProduct.size() > 0) {
                 showProduct();
@@ -94,7 +100,7 @@ public class FragmentSecondMenu extends Fragment {
             e.printStackTrace();
         }
 
-        accessToken = dataLogin.get(0).txtUserToken;
+        accessToken = dataToken.get(0).txtUserToken;
 
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,7 +191,7 @@ public class FragmentSecondMenu extends Fragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 String strLinkAPI = new clsHardCode().linkToken;
-                String refresh_token = dataLogin.get(0).txtRefreshToken;
+                String refresh_token = dataToken.get(0).txtRefreshToken;
                 NetworkResponse networkResponse = error.networkResponse;
                 if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
                     // HTTP Status Code: 401 Unauthorized
@@ -215,25 +221,18 @@ public class FragmentSecondMenu extends Fragment {
                                     JSONObject jsonObject = new JSONObject(response);
                                     accessToken = jsonObject.getString("access_token");
                                     refreshToken = jsonObject.getString("refresh_token");
+                                    String dtIssued = jsonObject.getString(".issued");
 
-                                    clsLogin data = new clsLogin();
-                                    data.setTxtGuiId(dataLogin.get(0).txtGuiId);
-                                    data.setTxtUsername(dataLogin.get(0).txtUsername);
-                                    data.setTxtPassword(dataLogin.get(0).txtPassword);
-                                    data.setDtLogin(dataLogin.get(0).dtLogin);
-                                    data.setTxtImei(dataLogin.get(0).txtImei);
-                                    data.setTxtDeviceName(dataLogin.get(0).txtDeviceName);
+                                    clsToken data = new clsToken();
+                                    data.setIntId("1");
+                                    data.setDtIssuedToken(dtIssued);
                                     data.setTxtUserToken(accessToken);
                                     data.setTxtRefreshToken(refreshToken);
-                                    data.setDtIssuedToken(currentDateTime);
 
-                                    loginRepo.createOrUpdate(data);
+                                    tokenRepo.createOrUpdate(data);
                                     Toast.makeText(context, "Success get new Access Token", Toast.LENGTH_SHORT).show();
 
-                                    new clsHardCode().copydb(context);
                                 } catch (JSONException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             }
