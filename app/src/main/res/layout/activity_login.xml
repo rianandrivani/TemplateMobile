@@ -24,6 +24,7 @@ android:fillViewport="true">
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <ImageView
             android:id="@+id/ivBannerLogin"
             android:layout_width="match_parent"
@@ -146,11 +147,11 @@ android:fillViewport="true">
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ping"
+            android:text="Refresh Application"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:textStyle="bold"
-            android:id="@+id/buttonPing"
+            android:id="@+id/buttonRefreshApp"
             android:layout_marginTop="5dp"
             android:background="@drawable/btn_on_click"/>
         <TextView

@@ -74,7 +74,7 @@ import java.util.Map;
 public class LoginActivity extends Activity {
     private static final int REQUEST_READ_PHONE_STATE = 0;
     EditText etUsername, etPassword;
-    String txtUsername, txtPassword, imeiNumber, deviceName, accessToken, refreshToken, access_token;
+    String txtUsername, txtPassword, imeiNumber, deviceName, access_token;
     String clientId = "";
     Button btnSubmit, btnExit;
     Spinner spnRole;
@@ -154,8 +154,6 @@ public class LoginActivity extends Activity {
             dataToken = (List<clsToken>) tokenRepo.findAll();
             if (dataToken.size() == 0) {
                 requestToken();
-            } else {
-                access_token = dataToken.get(0).getTxtUserToken();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -327,10 +325,16 @@ public class LoginActivity extends Activity {
         final String currentDateTime = DateFormat.getDateTimeInstance().format(new Date());
         String strLinkAPI = new clsHardCode().linkLogin;
         JSONObject resJson = new JSONObject();
+
         try {
+            tokenRepo = new clsTokenRepo(getApplicationContext());
+            dataToken = (List<clsToken>) tokenRepo.findAll();
             resJson.put("txtUsername", txtUsername);
             resJson.put("txtPassword", txtPassword);
+            resJson.put("txtRefreshToken", dataToken.get(0).txtRefreshToken.toString());
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         final String mRequestBody = resJson.toString();
@@ -402,6 +406,8 @@ public class LoginActivity extends Activity {
             public void onResponse(String response, Boolean status, String strErrorMsg) {
                 if (response != null) {
                     try {
+                        String accessToken = "";
+                        String refreshToken = "";
                         JSONObject jsonObject = new JSONObject(response);
                         accessToken = jsonObject.getString("access_token");
                         refreshToken = jsonObject.getString("refresh_token");
@@ -458,7 +464,7 @@ public class LoginActivity extends Activity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 String strLinkAPI = new clsHardCode().linkToken;
-                String refresh_token = dataToken.get(0).txtRefreshToken;
+                final String refresh_token = dataToken.get(0).txtRefreshToken;
                 NetworkResponse networkResponse = error.networkResponse;
                 if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
                     // HTTP Status Code: 401 Unauthorized
@@ -484,6 +490,9 @@ public class LoginActivity extends Activity {
                         public void onResponse(String response, Boolean status, String strErrorMsg) {
                             if (response != null) {
                                 try {
+                                    String accessToken = "";
+                                    String newRefreshToken = "";
+                                    String refreshToken = "";
                                     JSONObject jsonObject = new JSONObject(response);
                                     accessToken = jsonObject.getString("access_token");
                                     refreshToken = jsonObject.getString("refresh_token");
@@ -497,6 +506,10 @@ public class LoginActivity extends Activity {
 
                                     tokenRepo.createOrUpdate(data);
                                     Toast.makeText(getApplicationContext(), "Success get new Access Token", Toast.LENGTH_SHORT).show();
+                                    newRefreshToken = refreshToken;
+                                    if (refreshToken == newRefreshToken && !newRefreshToken.equals("")) {
+                                        login();
+                                    }
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -505,10 +518,6 @@ public class LoginActivity extends Activity {
                         }
                     });
 
-                    if (refreshToken != null) {
-                        login();
-                        finalDialog1.dismiss();
-                    }
                     finalDialog1.dismiss();
 
                 } else {
@@ -533,6 +542,13 @@ public class LoginActivity extends Activity {
 
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
+                try {
+                    tokenRepo = new clsTokenRepo(getApplicationContext());
+                    dataToken = (List<clsToken>) tokenRepo.findAll();
+                    access_token = dataToken.get(0).getTxtUserToken();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 HashMap<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + access_token);
 

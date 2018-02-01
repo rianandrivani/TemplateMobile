@@ -154,7 +154,7 @@ public class VolleyUtils {
                         body = new String(error.networkResponse.data,"UTF-8");
                         JSONObject jsonObject = new JSONObject(body);
                         message = jsonObject.getString("Message");
-                        Toast.makeText(activity.getApplicationContext(), "Error 401 " + message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity.getApplicationContext(), "Error 401, " + message, Toast.LENGTH_SHORT).show();
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -164,7 +164,16 @@ public class VolleyUtils {
                         listener.onError(error.getMessage());
                     }
                 } else if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_BAD_REQUEST) {
-                    Toast.makeText(activity.getApplicationContext(), "session has expired, please login again", Toast.LENGTH_SHORT).show();
+                    try {
+                        body = new String(error.networkResponse.data,"UTF-8");
+                        JSONObject jsonObject = new JSONObject(body);
+                        message = jsonObject.getString("error_description");
+                        Toast.makeText(activity.getApplicationContext(), "Error 401 " + message, Toast.LENGTH_SHORT).show();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 } else if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR ){
                     Toast.makeText(activity.getApplicationContext(), "Error 500, Server Error", Toast.LENGTH_SHORT).show();
                 } else {

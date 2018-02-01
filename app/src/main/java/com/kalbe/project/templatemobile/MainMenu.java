@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -535,6 +536,8 @@ public class MainMenu extends AppCompatActivity implements GoogleApiClient.Conne
 
     protected void captureImageProfile() {
         uriImage = getOutputMediaFileUri();
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriImage);
         startActivityForResult(cameraIntent, CAMERA_REQUEST_PROFILE);

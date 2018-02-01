@@ -30,6 +30,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.kalbe.project.templatemobile.Common.clsLogin;
 import com.kalbe.project.templatemobile.Common.clsToken;
+import com.kalbe.project.templatemobile.Common.mConfigData;
 import com.kalbe.project.templatemobile.Common.mProduct;
 import com.kalbe.project.templatemobile.Data.VolleyResponseListener;
 import com.kalbe.project.templatemobile.Data.VolleyUtils;
@@ -37,6 +38,7 @@ import com.kalbe.project.templatemobile.Data.clsHardCode;
 import com.kalbe.project.templatemobile.Repo.clsLoginRepo;
 import com.kalbe.project.templatemobile.Repo.clsPhotoProfilRepo;
 import com.kalbe.project.templatemobile.Repo.clsTokenRepo;
+import com.kalbe.project.templatemobile.Repo.mConfigRepo;
 import com.kalbe.project.templatemobile.Repo.mProductRepo;
 
 import org.apache.http.HttpStatus;
@@ -61,7 +63,7 @@ public class FragmentSecondMenu extends Fragment {
 
     private Spinner spnMasterProduct;
     private Button btnDownload;
-    public String accessToken, refreshToken;
+    public String accessToken;
 
     clsLoginRepo loginRepo = null;
     clsTokenRepo tokenRepo = null;
@@ -99,8 +101,6 @@ public class FragmentSecondMenu extends Fragment {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        accessToken = dataToken.get(0).txtUserToken;
 
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -192,6 +192,15 @@ public class FragmentSecondMenu extends Fragment {
             public void onErrorResponse(VolleyError error) {
                 String strLinkAPI = new clsHardCode().linkToken;
                 String refresh_token = dataToken.get(0).txtRefreshToken;
+                String clientId = "";
+                mConfigRepo configRepo = new mConfigRepo(context);
+                try {
+                    mConfigData configDataClient = (mConfigData) configRepo.findById(4);
+                    clientId = configDataClient.getTxtDefaultValue().toString();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 NetworkResponse networkResponse = error.networkResponse;
                 if (networkResponse != null && networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
                     // HTTP Status Code: 401 Unauthorized
@@ -207,7 +216,7 @@ public class FragmentSecondMenu extends Fragment {
                         e.printStackTrace();
                     }
 
-                    new VolleyUtils().requestTokenWithRefresh(getActivity(), strLinkAPI, refresh_token, "z/iQZAGiEmA+ygHJ+UvmcA3Ij/xrAGQPYzwyp1FI9IE=", new VolleyResponseListener() {
+                    new VolleyUtils().requestTokenWithRefresh(getActivity(), strLinkAPI, refresh_token, clientId, new VolleyResponseListener() {
                         @Override
                         public void onError(String message) {
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -217,20 +226,27 @@ public class FragmentSecondMenu extends Fragment {
                         public void onResponse(String response, Boolean status, String strErrorMsg) {
                             if (response != null) {
                                 try {
+                                    String refreshToken = "";
+                                    String newRefreshToken = "";
+                                    String access_token = "";
                                     String currentDateTime = DateFormat.getDateTimeInstance().format(new Date());
                                     JSONObject jsonObject = new JSONObject(response);
-                                    accessToken = jsonObject.getString("access_token");
+                                    access_token = jsonObject.getString("access_token");
                                     refreshToken = jsonObject.getString("refresh_token");
                                     String dtIssued = jsonObject.getString(".issued");
 
                                     clsToken data = new clsToken();
                                     data.setIntId("1");
                                     data.setDtIssuedToken(dtIssued);
-                                    data.setTxtUserToken(accessToken);
+                                    data.setTxtUserToken(access_token);
                                     data.setTxtRefreshToken(refreshToken);
 
                                     tokenRepo.createOrUpdate(data);
                                     Toast.makeText(context, "Success get new Access Token", Toast.LENGTH_SHORT).show();
+                                    newRefreshToken = refreshToken;
+                                    if (refreshToken == newRefreshToken && !newRefreshToken.equals("")) {
+                                        downloadMaster();
+                                    }
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -239,10 +255,6 @@ public class FragmentSecondMenu extends Fragment {
                         }
                     });
 
-                    if (refreshToken != null) {
-                        downloadMaster();
-                        finalDialog1.dismiss();
-                    }
                     finalDialog1.dismiss();
 
                 } else {
@@ -266,6 +278,14 @@ public class FragmentSecondMenu extends Fragment {
             }
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
+                try {
+                    tokenRepo = new clsTokenRepo(context);
+                    dataToken = (List<clsToken>) tokenRepo.findAll();
+                    accessToken = dataToken.get(0).txtUserToken;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 HashMap<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + accessToken);
 

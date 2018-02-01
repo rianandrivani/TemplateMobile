@@ -36,6 +36,12 @@
     <!-- for apex badge -->
     <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT" />
 
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_kalbe"
