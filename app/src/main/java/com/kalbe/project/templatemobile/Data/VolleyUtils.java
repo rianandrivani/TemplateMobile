@@ -167,8 +167,11 @@ public class VolleyUtils {
                     try {
                         body = new String(error.networkResponse.data,"UTF-8");
                         JSONObject jsonObject = new JSONObject(body);
-                        message = jsonObject.getString("error_description");
-                        Toast.makeText(activity.getApplicationContext(), "Error 401 " + message, Toast.LENGTH_SHORT).show();
+                        message = jsonObject.optString("error_description");
+                        if (message.equals("")) {
+                            message = jsonObject.optString("error");
+                        }
+                        Toast.makeText(activity.getApplicationContext(), "Error 401, " + message, Toast.LENGTH_SHORT).show();
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
