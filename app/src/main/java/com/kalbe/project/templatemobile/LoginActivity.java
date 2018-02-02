@@ -76,7 +76,7 @@ public class LoginActivity extends Activity {
     EditText etUsername, etPassword;
     String txtUsername, txtPassword, imeiNumber, deviceName, access_token;
     String clientId = "";
-    Button btnSubmit, btnExit;
+    Button btnSubmit, btnExit, btnRefreshApp;
     Spinner spnRole;
 
     private int intSet = 1;
@@ -145,6 +145,7 @@ public class LoginActivity extends Activity {
         etPassword = (EditText) findViewById(R.id.editTextPass);
         btnSubmit = (Button) findViewById(R.id.buttonLogin);
         btnExit = (Button) findViewById(R.id.buttonExit);
+        btnRefreshApp = (Button) findViewById(R.id.buttonRefreshApp);
         spnRole = (Spinner) findViewById(R.id.spnRole);
         final CircularProgressView progressView = (CircularProgressView) findViewById(R.id.progress_view);
 
@@ -285,6 +286,13 @@ public class LoginActivity extends Activity {
 
                 android.app.AlertDialog alert = builder.create();
                 alert.show();
+            }
+        });
+
+        btnRefreshApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestToken();
             }
         });
     }

@@ -171,7 +171,7 @@ public class VolleyUtils {
                         if (message.equals("")) {
                             message = jsonObject.optString("error");
                         }
-                        Toast.makeText(activity.getApplicationContext(), "Error 401, " + message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity.getApplicationContext(), "Error 400, " + message, Toast.LENGTH_SHORT).show();
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
